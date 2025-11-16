@@ -24,8 +24,8 @@ class StoreWorkedHourRequest extends FormRequest
     {
         return [
             'task' => 'nullable|string',
-            'hours' => 'nullable|integer|min:0',
-            'minutes' => 'nullable|integer|min:0',
+            'hours' => 'nullable|integer|min:0|max:24',
+            'minutes' => 'nullable|integer|min:0|max:59',
             'date' => 'nullable|date|date_format:Y-m-d',
             'bulk_insert' => 'nullable|string',
         ];

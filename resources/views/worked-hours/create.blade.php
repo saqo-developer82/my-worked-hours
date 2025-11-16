@@ -27,7 +27,7 @@
 
             <div class="mb-3">
                 <label for="hours" class="form-label">Hours</label>
-                <input type="number" name="hours" id="hours" class="form-control @error('hours') is-invalid @enderror" min="0" value="{{ old('hours', 0) }}">
+                <input type="number" name="hours" id="hours" class="form-control @error('hours') is-invalid @enderror" min="0" max="24" value="{{ old('hours', 0) }}">
                 @error('hours')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -35,7 +35,7 @@
 
             <div class="mb-3">
                 <label for="minutes" class="form-label">Minutes</label>
-                <input type="number" name="minutes" id="minutes" class="form-control @error('minutes') is-invalid @enderror" min="0" value="{{ old('minutes', 0) }}">
+                <input type="number" name="minutes" id="minutes" class="form-control @error('minutes') is-invalid @enderror" min="0" max="59" value="{{ old('minutes', 0) }}">
                 @error('minutes')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
