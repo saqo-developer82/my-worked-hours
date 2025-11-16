@@ -4,6 +4,10 @@ namespace App\Services;
 
 use App\Repositories\WorkedHourRepositoryInterface;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class WorkedHourService
 {
@@ -70,7 +74,6 @@ class WorkedHourService
     private function processBulkInsert(array $data): int
     {
         $lines = array_filter(array_map('trim', explode("\n", $data['bulk_insert'])));
-        $insertedCount = 0;
         $dataToInsert = [];
 
         foreach ($lines as $line) {
@@ -160,6 +163,141 @@ class WorkedHourService
     public function deleteWorkedHour(int $id): bool
     {
         return $this->repository->delete($id);
+    }
+
+    /**
+     * Get worked hours grouped by task for export.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return array
+     */
+    public function getGroupedWorkedHoursForExport(string $startDate, string $endDate): array
+    {
+        $data = $this->repository->getGroupedByTaskInDateRange($startDate, $endDate);
+        
+        // Convert excess minutes to hours for each task
+        return array_map(function ($item) {
+            $hours = $item['total_hours'];
+            $minutes = $item['total_minutes'];
+            
+            // Convert excess minutes to hours
+            $hours += intval($minutes / 60);
+            $minutes = $minutes % 60;
+            
+            return [
+                'task' => $item['task'],
+                'total_hours' => $hours,
+                'total_minutes' => $minutes,
+            ];
+        }, $data);
+    }
+
+    /**
+     * Generate Excel file for export.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return array ['filePath' => string, 'filename' => string]
+     */
+    public function generateExportFile(string $startDate, string $endDate): array
+    {
+        // Get grouped data
+        $groupedData = $this->getGroupedWorkedHoursForExport($startDate, $endDate);
+
+        // Calculate totals
+        $totalHours = 0;
+        $totalMinutes = 0;
+        foreach ($groupedData as $item) {
+            $totalHours += $item['total_hours'];
+            $totalMinutes += $item['total_minutes'];
+        }
+
+        // Convert excess minutes to hours
+        $totalHours += intval($totalMinutes / 60);
+        $totalMinutes = $totalMinutes % 60;
+
+        // Create spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $sheet->setCellValue('A1', 'TASKS/WORK');
+        $sheet->setCellValue('B1', 'Duration');
+
+        // Style headers
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E0E0E0'],
+            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ];
+        $sheet->getStyle('A1:B1')->applyFromArray($headerStyle);
+
+        // Add data rows
+        $row = 2;
+        foreach ($groupedData as $item) {
+            $sheet->setCellValue('A' . $row, $item['task']);
+            $sheet->setCellValue('B' . $row, $this->formatDuration($item['total_hours'], $item['total_minutes']));
+            $row++;
+        }
+
+        // Add total row
+        $sheet->setCellValue('A' . $row, 'TOTAL');
+        $sheet->setCellValue('B' . $row, $this->formatDuration($totalHours, $totalMinutes));
+
+        // Style total row
+        $totalStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'D0D0D0'],
+            ],
+        ];
+        $sheet->getStyle('A' . $row . ':B' . $row)->applyFromArray($totalStyle);
+
+        // Auto-size columns
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+
+        // Generate filename
+        $filename = 'worked_hours_' . $startDate . '_to_' . $endDate . '.xlsx';
+        $filePath = storage_path('app/' . $filename);
+
+        // Write file
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        return [
+            'filePath' => $filePath,
+            'filename' => $filename,
+        ];
+    }
+
+    /**
+     * Format duration string.
+     *
+     * @param int $hours
+     * @param int $minutes
+     * @return string
+     */
+    public function formatDuration(int $hours, int $minutes): string
+    {
+        if ($hours == 0 && $minutes == 0) {
+            return '0m';
+        }
+        
+        if ($hours == 0) {
+            return $minutes . 'm';
+        }
+        
+        if ($minutes == 0) {
+            return $hours . 'h';
+        }
+        
+        return $hours . 'h:' . $minutes . 'm';
     }
 
     /**

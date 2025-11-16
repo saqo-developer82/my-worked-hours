@@ -24,6 +24,15 @@ interface WorkedHourRepositoryInterface
     public function getAll(): Collection;
 
     /**
+     * Get worked hours grouped by task within date range.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return array
+     */
+    public function getGroupedByTaskInDateRange(string $startDate, string $endDate): array;
+
+    /**
      * Create a new worked hour record.
      *
      * @param array $data

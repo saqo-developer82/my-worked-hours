@@ -10,3 +10,4 @@ Route::get('/worked-hours/{id}/edit', [WorkedHourController::class, 'edit'])->na
 Route::put('/worked-hours/{id}', [WorkedHourController::class, 'update'])->name('worked-hours.update');
 Route::delete('/worked-hours/{id}', [WorkedHourController::class, 'destroy'])->name('worked-hours.destroy');
 Route::get('/worked-hours/export', [WorkedHourController::class, 'export'])->name('worked-hours.export');
+Route::post('/worked-hours/export', [WorkedHourController::class, 'processExport'])->name('worked-hours.export.process');

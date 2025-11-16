@@ -31,6 +31,30 @@ class WorkedHourRepository implements WorkedHourRepositoryInterface
     }
 
     /**
+     * Get worked hours grouped by task within date range.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return array
+     */
+    public function getGroupedByTaskInDateRange(string $startDate, string $endDate): array
+    {
+        return WorkedHour::whereBetween('date', [$startDate, $endDate])
+            ->selectRaw('task, SUM(hours) as total_hours, SUM(minutes) as total_minutes')
+            ->groupBy('task')
+            ->orderBy('task')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'task' => $item->task,
+                    'total_hours' => (int)$item->total_hours,
+                    'total_minutes' => (int)$item->total_minutes,
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
      * Create a new worked hour record.
      *
      * @param array $data

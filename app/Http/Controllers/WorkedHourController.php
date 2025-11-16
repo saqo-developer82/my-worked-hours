@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExportWorkedHourRequest;
 use App\Http\Requests\StoreWorkedHourRequest;
 use App\Http\Requests\UpdateWorkedHourRequest;
 use App\Services\WorkedHourService;
@@ -95,39 +96,24 @@ class WorkedHourController extends Controller
     }
 
     /**
-     * Export worked hours data.
+     * Show the export form.
      */
     public function export()
     {
-        $workedHours = $this->service->getAllWorkedHours();
+        return view('worked-hours.export');
+    }
 
-        $filename = 'worked_hours_' . date('Y-m-d') . '.csv';
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
+    /**
+     * Process and download the export.
+     */
+    public function processExport(ExportWorkedHourRequest $request)
+    {
+        $validated = $request->validated();
+        $startDate = $validated['start_date'];
+        $endDate = $validated['end_date'];
 
-        $callback = function() use ($workedHours) {
-            $file = fopen('php://output', 'w');
-            
-            // Add CSV headers
-            fputcsv($file, ['ID', 'Task', 'Hours', 'Minutes', 'Date']);
-            
-            // Add data rows
-            foreach ($workedHours as $workedHour) {
-                fputcsv($file, [
-                    $workedHour->id,
-                    $workedHour->task,
-                    $workedHour->hours,
-                    $workedHour->minutes,
-                    $workedHour->date->format('Y-m-d'),
-                ]);
-            }
-            
-            fclose($file);
-        };
+        $exportData = $this->service->generateExportFile($startDate, $endDate);
 
-        return response()->stream($callback, 200, $headers);
+        return response()->download($exportData['filePath'], $exportData['filename'])->deleteFileAfterSend(true);
     }
 }
