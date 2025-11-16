@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('worked_hours', function (Blueprint $table) {
-            $table->id();
-            $table->text('task');
-            $table->integer('hours');
-            $table->integer('minutes');
-            $table->date('date');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('worked_hours')) {
+            Schema::create('worked_hours', function (Blueprint $table) {
+                $table->id();
+                $table->text('task');
+                $table->integer('hours')->default(0);
+                $table->integer('minutes')->default(0);
+                $table->date('date')->default(now());
+                $table->timestamps();
+            });
+        }
     }
 
     /**
