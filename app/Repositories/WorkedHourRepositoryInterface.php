@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\WorkedHour;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+
+interface WorkedHourRepositoryInterface
+{
+    /**
+     * Get all worked hours ordered by date descending with pagination.
+     *
+     * @param int $perPage
+     * @return LengthAwarePaginator
+     */
+    public function getAllPaginated(int $perPage = 10): LengthAwarePaginator;
+
+    /**
+     * Get all worked hours ordered by date descending.
+     *
+     * @return Collection
+     */
+    public function getAll(): Collection;
+
+    /**
+     * Create a new worked hour record.
+     *
+     * @param array $data
+     * @return WorkedHour
+     */
+    public function create(array $data): WorkedHour;
+}
+

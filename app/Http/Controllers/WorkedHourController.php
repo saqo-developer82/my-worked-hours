@@ -3,18 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkedHourRequest;
-use App\Models\WorkedHour;
-use Carbon\Carbon;
+use App\Services\WorkedHourService;
 
 class WorkedHourController extends Controller
 {
+    public function __construct(
+        private WorkedHourService $service
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $workedHours = WorkedHour::orderBy('date', 'desc')
-            ->paginate(10);
+        $workedHours = $this->service->getPaginatedWorkedHours(10);
 
         return view('worked-hours.index', compact('workedHours'));
     }
@@ -33,58 +35,7 @@ class WorkedHourController extends Controller
     public function store(StoreWorkedHourRequest $request)
     {
         $validated = $request->validated();
-
-        $insertedCount = 0;
-
-        // Check if bulk insert is provided
-        if (!empty($validated['bulk_insert'])) {
-            $lines = array_filter(array_map('trim', explode("\n", $validated['bulk_insert'])));
-            
-            foreach ($lines as $line) {
-                if (empty($line)) {
-                    continue;
-                }
-
-                // Parse the line - could be comma-separated or just task title
-                $parts = array_map('trim', explode(',', $line));
-                
-                $taskTitle = $parts[0] ?? '';
-                $hours = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : ($validated['hours'] ?? 0);
-                $minutes = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : ($validated['minutes'] ?? 0);
-                $date = isset($parts[3]) && !empty($parts[3]) ? $parts[3] : ($validated['date'] ?? date('Y-m-d'));
-
-                // Validate date format
-                if (!empty($date)) {
-                    try {
-                        $dateObj = Carbon::createFromFormat('Y-m-d', $date);
-                        $date = $dateObj->format('Y-m-d');
-                    } catch (\Exception $e) {
-                        $date = $validated['date'] ?? date('Y-m-d');
-                    }
-                } else {
-                    $date = $validated['date'] ?? date('Y-m-d');
-                }
-
-                if (!empty($taskTitle)) {
-                    WorkedHour::create([
-                        'task' => $taskTitle,
-                        'hours' => $hours,
-                        'minutes' => $minutes,
-                        'date' => $date,
-                    ]);
-                    $insertedCount++;
-                }
-            }
-        } else {
-            // Single insert
-            WorkedHour::create([
-                'task' => $validated['task'],
-                'hours' => $validated['hours'] ?? 0,
-                'minutes' => $validated['minutes'] ?? 0,
-                'date' => $validated['date'] ?? date('Y-m-d'),
-            ]);
-            $insertedCount = 1;
-        }
+        $insertedCount = $this->service->storeWorkedHours($validated);
 
         $message = $insertedCount > 1 
             ? "Successfully inserted {$insertedCount} worked hour records."
@@ -99,7 +50,7 @@ class WorkedHourController extends Controller
      */
     public function export()
     {
-        $workedHours = WorkedHour::orderBy('date', 'desc')->get();
+        $workedHours = $this->service->getAllWorkedHours();
 
         $filename = 'worked_hours_' . date('Y-m-d') . '.csv';
         
