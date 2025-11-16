@@ -7,7 +7,7 @@
     <div class="card-body">
         <h1 class="card-title mb-4">My Worked Hours</h1>
         <div class="d-flex gap-2">
-            <a href="{{ route('worked-hours.create') }}" class="btn btn-success">Add New Task</a>
+            <a href="{{ route('worked-hours.create') }}" class="btn btn-success">Add New Task(s)</a>
             <a href="{{ route('worked-hours.export') }}" class="btn btn-info">Export Data</a>
         </div>
     </div>

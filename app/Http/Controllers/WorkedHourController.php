@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkedHour;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class WorkedHourController extends Controller
 {
@@ -32,16 +33,77 @@ class WorkedHourController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'task' => 'required|string',
-            'hours' => 'required|integer|min:0',
-            'minutes' => 'required|integer|min:0|max:59',
-            'date' => 'required|date',
+            'task' => 'nullable|string',
+            'hours' => 'nullable|integer|min:0',
+            'minutes' => 'nullable|integer|min:0',
+            'date' => 'nullable|date|date_format:Y-m-d',
+            'bulk_insert' => 'nullable|string',
         ]);
 
-        WorkedHour::create($validated);
+        $insertedCount = 0;
+
+        // Check if bulk insert is provided
+        if (!empty($validated['bulk_insert'])) {
+            $lines = array_filter(array_map('trim', explode("\n", $validated['bulk_insert'])));
+            
+            foreach ($lines as $line) {
+                if (empty($line)) {
+                    continue;
+                }
+
+                // Parse the line - could be comma-separated or just task title
+                $parts = array_map('trim', explode(',', $line));
+                
+                $taskTitle = $parts[0] ?? '';
+                $hours = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : ($validated['hours'] ?? 0);
+                $minutes = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : ($validated['minutes'] ?? 0);
+                $date = isset($parts[3]) && !empty($parts[3]) ? $parts[3] : ($validated['date'] ?? date('Y-m-d'));
+
+                // Validate date format
+                if (!empty($date)) {
+                    try {
+                        $dateObj = Carbon::createFromFormat('Y-m-d', $date);
+                        $date = $dateObj->format('Y-m-d');
+                    } catch (\Exception $e) {
+                        $date = $validated['date'] ?? date('Y-m-d');
+                    }
+                } else {
+                    $date = $validated['date'] ?? date('Y-m-d');
+                }
+
+                if (!empty($taskTitle)) {
+                    WorkedHour::create([
+                        'task' => $taskTitle,
+                        'hours' => $hours,
+                        'minutes' => $minutes,
+                        'date' => $date,
+                    ]);
+                    $insertedCount++;
+                }
+            }
+        } else {
+            // Single insert
+            if (empty($validated['task'])) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['task' => 'Task title is required when not using bulk insert.']);
+            }
+
+            WorkedHour::create([
+                'task' => $validated['task'],
+                'hours' => $validated['hours'] ?? 0,
+                'minutes' => $validated['minutes'] ?? 0,
+                'date' => $validated['date'] ?? date('Y-m-d'),
+            ]);
+            $insertedCount = 1;
+        }
+
+        $message = $insertedCount > 1 
+            ? "Successfully inserted {$insertedCount} worked hour records."
+            : 'Worked hour record created successfully.';
 
         return redirect()->route('worked-hours.index')
-            ->with('success', 'Worked hour record created successfully.');
+            ->with('success', $message);
     }
 
     /**
