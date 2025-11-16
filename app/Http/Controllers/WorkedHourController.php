@@ -25,7 +25,16 @@ class WorkedHourController extends Controller
 
         $workedHours = $this->service->getPaginatedWorkedHours(10, $filters);
 
-        return view('worked-hours.index', compact('workedHours'));
+        // Calculate totals if date range is provided
+        $totalWorkedHours = null;
+        $startDate = request()->get('total_start_date');
+        $endDate = request()->get('total_end_date');
+        
+        if ($startDate && $endDate) {
+            $totalWorkedHours = $this->service->getTotalWorkedHoursForDateRange($startDate, $endDate);
+        }
+
+        return view('worked-hours.index', compact('workedHours', 'totalWorkedHours'));
     }
 
     /**

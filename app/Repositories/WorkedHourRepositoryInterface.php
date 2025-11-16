@@ -34,6 +34,15 @@ interface WorkedHourRepositoryInterface
     public function getGroupedByTaskInDateRange(string $startDate, string $endDate): array;
 
     /**
+     * Get total hours and minutes within date range.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return array ['total_hours' => int, 'total_minutes' => int]
+     */
+    public function getTotalHoursInDateRange(string $startDate, string $endDate): array;
+
+    /**
      * Create a new worked hour record.
      *
      * @param array $data

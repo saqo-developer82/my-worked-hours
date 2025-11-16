@@ -51,13 +51,52 @@
             </div>
         </div>
 
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Total Worked Hours</h5>
+                <form method="GET" action="{{ route('worked-hours.index') }}" class="row g-3">
+                    <input type="hidden" name="task" value="{{ request('task') }}">
+                    <input type="hidden" name="date" value="{{ request('date') }}">
+                    <div class="col-md-4">
+                        <label for="total_start_date" class="form-label">Start Date</label>
+                        <input type="date" name="total_start_date" id="total_start_date" class="form-control" value="{{ request('total_start_date') }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="total_end_date" class="form-label">End Date</label>
+                        <input type="date" name="total_end_date" id="total_end_date" class="form-control" value="{{ request('total_end_date') }}" required>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn btn-success">Calculate Total</button>
+                            <a href="{{ route('worked-hours.index', ['task' => request('task'), 'date' => request('date')]) }}" class="btn btn-secondary">Clear</a>
+                        </div>
+                    </div>
+                </form>
+                
+                @if(isset($totalWorkedHours))
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <h6 class="mb-2">Total Worked Hours:</h6>
+                        <p class="mb-0 fs-4 fw-bold text-primary">
+                            {{ $totalWorkedHours['formatted'] }}
+                            <small class="text-muted fs-6">
+                                ({{ $totalWorkedHours['total_hours'] }}h {{ $totalWorkedHours['total_minutes'] }}m)
+                            </small>
+                        </p>
+                        <p class="text-muted mb-0 mt-2">
+                            <small>From {{ request('total_start_date') }} to {{ request('total_end_date') }}</small>
+                        </p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         @if($workedHours->count() > 0)
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Task</th>
+                            <th>Task/Work</th>
                             <th>Hours</th>
                             <th>Minutes</th>
                             <th>Date</th>

@@ -69,6 +69,25 @@ class WorkedHourRepository implements WorkedHourRepositoryInterface
     }
 
     /**
+     * Get total hours and minutes within date range.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return array ['total_hours' => int, 'total_minutes' => int]
+     */
+    public function getTotalHoursInDateRange(string $startDate, string $endDate): array
+    {
+        $result = WorkedHour::whereBetween('date', [$startDate, $endDate])
+            ->selectRaw('SUM(hours) as total_hours, SUM(minutes) as total_minutes')
+            ->first();
+
+        return [
+            'total_hours' => (int)($result->total_hours ?? 0),
+            'total_minutes' => (int)($result->total_minutes ?? 0),
+        ];
+    }
+
+    /**
      * Create a new worked hour record.
      *
      * @param array $data

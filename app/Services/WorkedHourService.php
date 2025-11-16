@@ -278,6 +278,31 @@ class WorkedHourService
     }
 
     /**
+     * Get total worked hours for a date range.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return array ['total_hours' => int, 'total_minutes' => int, 'formatted' => string]
+     */
+    public function getTotalWorkedHoursForDateRange(string $startDate, string $endDate): array
+    {
+        $totals = $this->repository->getTotalHoursInDateRange($startDate, $endDate);
+        
+        $totalHours = $totals['total_hours'];
+        $totalMinutes = $totals['total_minutes'];
+        
+        // Convert excess minutes to hours
+        $totalHours += intval($totalMinutes / 60);
+        $totalMinutes = $totalMinutes % 60;
+        
+        return [
+            'total_hours' => $totalHours,
+            'total_minutes' => $totalMinutes,
+            'formatted' => $this->formatDuration($totalHours, $totalMinutes),
+        ];
+    }
+
+    /**
      * Format duration string.
      *
      * @param int $hours
