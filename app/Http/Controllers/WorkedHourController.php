@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreWorkedHourRequest;
 use App\Models\WorkedHour;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class WorkedHourController extends Controller
@@ -30,15 +30,9 @@ class WorkedHourController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreWorkedHourRequest $request)
     {
-        $validated = $request->validate([
-            'task' => 'nullable|string',
-            'hours' => 'nullable|integer|min:0',
-            'minutes' => 'nullable|integer|min:0',
-            'date' => 'nullable|date|date_format:Y-m-d',
-            'bulk_insert' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $insertedCount = 0;
 
@@ -83,12 +77,6 @@ class WorkedHourController extends Controller
             }
         } else {
             // Single insert
-            if (empty($validated['task'])) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['task' => 'Task title is required when not using bulk insert.']);
-            }
-
             WorkedHour::create([
                 'task' => $validated['task'],
                 'hours' => $validated['hours'] ?? 0,
