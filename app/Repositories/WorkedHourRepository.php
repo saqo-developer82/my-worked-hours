@@ -91,6 +91,38 @@ class WorkedHourRepository implements WorkedHourRepositoryInterface
     }
 
     /**
+     * Get total hours and minutes with filters applied.
+     *
+     * @param array $filters
+     * @return array ['total_hours' => int, 'total_minutes' => int]
+     */
+    public function getTotalHoursWithFilters(array $filters = []): array
+    {
+        $query = WorkedHour::query();
+
+        // Filter by task (case-insensitive LIKE)
+        if (!empty($filters['task'])) {
+            $query->whereRaw('LOWER(task) LIKE ?', ['%' . strtolower($filters['task']) . '%']);
+        }
+
+        // Filter by date interval (takes precedence over single date)
+        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+            $query->whereBetween('date', [$filters['start_date'], $filters['end_date']]);
+        } elseif (!empty($filters['date'])) {
+            // Filter by single date
+            $query->whereDate('date', $filters['date']);
+        }
+
+        $result = $query->selectRaw('SUM(hours) as total_hours, SUM(minutes) as total_minutes')
+            ->first();
+
+        return [
+            'total_hours' => (int)($result->total_hours ?? 0),
+            'total_minutes' => (int)($result->total_minutes ?? 0),
+        ];
+    }
+
+    /**
      * Create a new worked hour record.
      *
      * @param array $data

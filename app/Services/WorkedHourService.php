@@ -303,6 +303,30 @@ class WorkedHourService
     }
 
     /**
+     * Get total worked hours with filters applied.
+     *
+     * @param array $filters
+     * @return array ['total_hours' => int, 'total_minutes' => int, 'formatted' => string]
+     */
+    public function getTotalWorkedHoursWithFilters(array $filters = []): array
+    {
+        $totals = $this->repository->getTotalHoursWithFilters($filters);
+        
+        $totalHours = $totals['total_hours'];
+        $totalMinutes = $totals['total_minutes'];
+        
+        // Convert excess minutes to hours
+        $totalHours += intval($totalMinutes / 60);
+        $totalMinutes = $totalMinutes % 60;
+        
+        return [
+            'total_hours' => $totalHours,
+            'total_minutes' => $totalMinutes,
+            'formatted' => $this->formatDuration($totalHours, $totalMinutes),
+        ];
+    }
+
+    /**
      * Format duration string.
      *
      * @param int $hours

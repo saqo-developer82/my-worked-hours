@@ -43,6 +43,14 @@ interface WorkedHourRepositoryInterface
     public function getTotalHoursInDateRange(string $startDate, string $endDate): array;
 
     /**
+     * Get total hours and minutes with filters applied.
+     *
+     * @param array $filters
+     * @return array ['total_hours' => int, 'total_minutes' => int]
+     */
+    public function getTotalHoursWithFilters(array $filters = []): array;
+
+    /**
      * Create a new worked hour record.
      *
      * @param array $data
