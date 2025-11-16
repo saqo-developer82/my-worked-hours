@@ -129,6 +129,29 @@ class WorkedHourService
     }
 
     /**
+     * Get a worked hour record by ID.
+     *
+     * @param int $id
+     * @return \App\Models\WorkedHour|null
+     */
+    public function getWorkedHourById(int $id)
+    {
+        return $this->repository->findById($id);
+    }
+
+    /**
+     * Update a worked hour record.
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function updateWorkedHour(int $id, array $data): bool
+    {
+        return $this->repository->update($id, $data);
+    }
+
+    /**
      * Delete a worked hour record by ID.
      *
      * @param int $id

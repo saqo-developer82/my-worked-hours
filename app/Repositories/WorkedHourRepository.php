@@ -53,6 +53,29 @@ class WorkedHourRepository implements WorkedHourRepositoryInterface
     }
 
     /**
+     * Find a worked hour record by ID.
+     *
+     * @param int $id
+     * @return WorkedHour|null
+     */
+    public function findById(int $id): ?WorkedHour
+    {
+        return WorkedHour::find($id);
+    }
+
+    /**
+     * Update a worked hour record.
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function update(int $id, array $data): bool
+    {
+        return WorkedHour::where('id', $id)->update($data) > 0;
+    }
+
+    /**
      * Delete a worked hour record by ID.
      *
      * @param int $id

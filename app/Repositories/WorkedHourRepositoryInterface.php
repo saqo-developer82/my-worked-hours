@@ -40,6 +40,23 @@ interface WorkedHourRepositoryInterface
     public function insert(array $data): bool;
 
     /**
+     * Find a worked hour record by ID.
+     *
+     * @param int $id
+     * @return WorkedHour|null
+     */
+    public function findById(int $id): ?WorkedHour;
+
+    /**
+     * Update a worked hour record.
+     *
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function update(int $id, array $data): bool;
+
+    /**
      * Delete a worked hour record by ID.
      *
      * @param int $id

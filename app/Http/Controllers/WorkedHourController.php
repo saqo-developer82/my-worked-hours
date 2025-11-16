@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkedHourRequest;
+use App\Http\Requests\UpdateWorkedHourRequest;
 use App\Services\WorkedHourService;
 
 class WorkedHourController extends Controller
@@ -43,6 +44,38 @@ class WorkedHourController extends Controller
 
         return redirect()->route('worked-hours.index')
             ->with('success', $message);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(int $id)
+    {
+        $workedHour = $this->service->getWorkedHourById($id);
+
+        if (!$workedHour) {
+            return redirect()->route('worked-hours.index')
+                ->with('error', 'Worked hour record not found.');
+        }
+
+        return view('worked-hours.edit', compact('workedHour'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateWorkedHourRequest $request, int $id)
+    {
+        $data = $request->validated();
+        $updated = $this->service->updateWorkedHour($id, $data);
+
+        if ($updated) {
+            return redirect()->route('worked-hours.index')
+                ->with('success', 'Worked hour record updated successfully.');
+        }
+
+        return redirect()->route('worked-hours.index')
+            ->with('error', 'Failed to update worked hour record.');
     }
 
     /**
