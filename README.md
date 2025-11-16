@@ -1,66 +1,214 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Worked Hours Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 11 web application for tracking and managing worked hours on various tasks. This application allows you to record, filter, and export your work time data efficiently.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Task Management
+- **View Tasks**: Display all worked tasks in a paginated table (10 records per page), sorted by date in descending order
+- **Add Tasks**: Create new task entries with:
+  - Task title (required)
+  - Hours (optional, default: 0)
+  - Minutes (optional, default: 0, max: 59)
+  - Date (optional, format: YYYY-MM-DD)
+- **Bulk Insert**: Add multiple tasks at once using a textarea with multiline format
+- **Edit Tasks**: Update existing task records
+- **Delete Tasks**: Remove task records with confirmation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Filtering & Search
+- **Task Filter**: Search tasks by name using case-insensitive LIKE search
+- **Date Filtering**: Filter by:
+  - Single date
+  - Date interval (start date and end date)
+  - Date interval takes precedence over single date when both are provided
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Total Hours Calculation
+- **Automatic Totals**: Total worked hours are automatically calculated and displayed based on current filters
+- **Real-time Updates**: Totals update automatically when filters are applied
+- **Smart Conversion**: Excess minutes are automatically converted to hours (e.g., 65 minutes = 1 hour 5 minutes)
 
-## Learning Laravel
+### Data Export
+- **Excel Export**: Export worked hours data to Excel format (.xlsx)
+- **Date Range Selection**: Choose start and end dates for export
+- **Grouped Data**: Data is grouped by task with total hours and minutes per task
+- **Summary Row**: Excel file includes a total row showing overall hours and minutes
+- **Formatted Duration**: Duration displayed in readable format (e.g., "5h:30m", "45m", "8h")
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Requirements
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- PHP >= 8.2
+- MySQL Database
+- Composer
+- Laravel 11
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Installation
 
-## Laravel Sponsors
+1. **Clone the repository** (if applicable) or navigate to the project directory:
+   ```bash
+   cd /var/www/MyWorkedHours
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install dependencies**:
+   ```bash
+   composer install
+   ```
 
-### Premium Partners
+3. **Configure environment**:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+4. **Configure database**:
+   Edit `.env` file and set your database credentials:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=my_personal_database
+   DB_USERNAME=your_username
+   DB_PASSWORD=your_password
+   ```
 
-## Contributing
+5. **Run migrations**:
+   ```bash
+   php artisan migrate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   The migration will create the `worked_hours` table with the following structure:
+   - `id` (primary key, auto-increment)
+   - `task` (text)
+   - `hours` (integer, default: 0)
+   - `minutes` (integer, default: 0)
+   - `date` (date, nullable)
+   - `created_at` (timestamp)
+   - `updated_at` (timestamp)
 
-## Code of Conduct
+6. **Start the development server**:
+   ```bash
+   php artisan serve
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   The application will be available at `http://localhost:8000`
 
-## Security Vulnerabilities
+## Usage
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Adding Tasks
+
+1. Click "Add New Task(s)" button on the main page
+2. Fill in the form:
+   - **Task Title**: Enter the task name (required)
+   - **Hours**: Enter worked hours (optional, default: 0)
+   - **Minutes**: Enter worked minutes (optional, default: 0, max: 59)
+   - **Date**: Select the date (optional, format: YYYY-MM-DD)
+3. For bulk insert, use the textarea with format:
+   - Full format: `Task Title, Hours, Minutes, Date (YYYY-MM-DD)`
+   - Simple format: `Task Title` (uses defaults: 0 hours, 0 minutes, current date)
+4. Click "Submit" to save
+
+### Filtering Data
+
+1. Use the filter form on the main page:
+   - **Task**: Enter task name to search (case-insensitive)
+   - **Date (Single)**: Select a specific date
+   - **Start Date / End Date**: Select a date range
+2. Click "Filter" to apply filters
+3. Click "Clear" to remove all filters
+
+### Viewing Totals
+
+Total worked hours are automatically displayed at the top of the list, showing:
+- Formatted duration (e.g., "5h:30m")
+- Raw values in parentheses
+- Current filter context
+
+### Editing Tasks
+
+1. Click "Edit" button on any task row
+2. Modify the task details
+3. Click "Update" to save changes
+
+### Deleting Tasks
+
+1. Click "Delete" button on any task row
+2. Confirm the deletion in the popup dialog
+
+### Exporting Data
+
+1. Click "Export Data" button on the main page
+2. Select start and end dates (default: last 7 days)
+3. Click "Export" to download the Excel file
+4. The exported file will contain:
+   - Headers: "TASKS/WORK" and "Duration"
+   - Grouped tasks with total hours and minutes
+   - Total row at the bottom
+
+## Project Structure
+
+```
+MyWorkedHours/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   └── WorkedHourController.php
+│   │   └── Requests/
+│   │       ├── StoreWorkedHourRequest.php
+│   │       ├── UpdateWorkedHourRequest.php
+│   │       └── ExportWorkedHourRequest.php
+│   ├── Models/
+│   │   └── WorkedHour.php
+│   ├── Repositories/
+│   │   ├── WorkedHourRepositoryInterface.php
+│   │   └── WorkedHourRepository.php
+│   ├── Services/
+│   │   └── WorkedHourService.php
+│   └── Providers/
+│       └── AppServiceProvider.php
+├── database/
+│   └── migrations/
+│       └── 2025_11_16_072619_create_worked_hours_table.php
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   └── app.blade.php
+│       └── worked-hours/
+│           ├── index.blade.php
+│           ├── create.blade.php
+│           ├── edit.blade.php
+│           └── export.blade.php
+└── routes/
+    └── web.php
+```
+
+## Architecture
+
+The application follows a clean architecture pattern:
+
+- **Controllers**: Handle HTTP requests and responses
+- **Services**: Contain business logic
+- **Repositories**: Handle database operations
+- **Requests**: Validate form input
+- **Models**: Represent database entities
+
+## Technologies Used
+
+- **Laravel 11**: PHP web framework
+- **MySQL**: Database
+- **Bootstrap 5**: Frontend CSS framework
+- **PhpSpreadsheet**: Excel file generation
+- **Blade**: Laravel templating engine
+
+## Routes
+
+- `GET /` - List all worked hours
+- `GET /worked-hours/create` - Show create form
+- `POST /worked-hours` - Store new task(s)
+- `GET /worked-hours/{id}/edit` - Show edit form
+- `PUT /worked-hours/{id}` - Update task
+- `DELETE /worked-hours/{id}` - Delete task
+- `GET /worked-hours/export` - Show export form
+- `POST /worked-hours/export` - Process export and download Excel file
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
