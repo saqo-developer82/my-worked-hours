@@ -46,6 +46,22 @@ class WorkedHourController extends Controller
     }
 
     /**
+     * Delete a worked hour record.
+     */
+    public function destroy(int $id)
+    {
+        $deleted = $this->service->deleteWorkedHour($id);
+
+        if ($deleted) {
+            return redirect()->route('worked-hours.index')
+                ->with('success', 'Worked hour record deleted successfully.');
+        }
+
+        return redirect()->route('worked-hours.index')
+            ->with('error', 'Failed to delete worked hour record.');
+    }
+
+    /**
      * Export worked hours data.
      */
     public function export()

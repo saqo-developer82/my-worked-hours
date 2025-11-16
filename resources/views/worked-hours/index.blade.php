@@ -22,6 +22,13 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         @if($workedHours->count() > 0)
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
@@ -32,6 +39,7 @@
                             <th>Hours</th>
                             <th>Minutes</th>
                             <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -42,6 +50,13 @@
                                 <td>{{ $workedHour->hours }}</td>
                                 <td>{{ $workedHour->minutes }}</td>
                                 <td>{{ $workedHour->date->format('Y-m-d') }}</td>
+                                <td>
+                                    <form action="{{ route('worked-hours.destroy', $workedHour->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -129,6 +129,17 @@ class WorkedHourService
     }
 
     /**
+     * Delete a worked hour record by ID.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function deleteWorkedHour(int $id): bool
+    {
+        return $this->repository->delete($id);
+    }
+
+    /**
      * Validate and format date string.
      *
      * @param string $date

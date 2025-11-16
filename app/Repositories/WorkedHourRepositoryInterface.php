@@ -38,5 +38,13 @@ interface WorkedHourRepositoryInterface
      * @return bool
      */
     public function insert(array $data): bool;
+
+    /**
+     * Delete a worked hour record by ID.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool;
 }
 

@@ -51,5 +51,16 @@ class WorkedHourRepository implements WorkedHourRepositoryInterface
     {
         return WorkedHour::insert($data);
     }
+
+    /**
+     * Delete a worked hour record by ID.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool
+    {
+        return WorkedHour::where('id', $id)->delete() > 0;
+    }
 }
 
