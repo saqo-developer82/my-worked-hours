@@ -19,7 +19,7 @@
 
             <div class="mb-3">
                 <label for="task" class="form-label">Task Title *</label>
-                <input type="text" name="task" id="task" class="form-control @error('task') is-invalid @enderror" value="{{ old('task') }}" required>
+                <input type="text" name="task" id="task" class="form-control @error('task') is-invalid @enderror" value="{{ old('task') }}">
                 @error('task')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -51,10 +51,9 @@
 
             <div class="mb-3">
                 <label for="bulk_insert" class="form-label">Bulk Insert</label>
-                <textarea name="bulk_insert" id="bulk_insert" class="form-control @error('bulk_insert') is-invalid @enderror" rows="10" placeholder="Enter multiple tasks, one per line. Format: Task Title, Hours, Minutes, Date (YYYY-MM-DD)&#10;Example:&#10;Task 1, 2, 30, 2024-01-15&#10;Task 2, 1, 45, 2024-01-16&#10;Or just task titles (hours, minutes, date will use form values or defaults):&#10;Task 3&#10;Task 4">{{ old('bulk_insert') }}</textarea>
+                <textarea name="bulk_insert" id="bulk_insert" class="form-control @error('bulk_insert') is-invalid @enderror" rows="10" placeholder="Enter multiple tasks, one per line. Format: Task Title 1h:1m&#10;Example:&#10;Task 1 1h:30m&#10;Task 2 1h:45m&#10;">{{ old('bulk_insert') }}</textarea>
                 <small class="form-text text-muted">
-                    Enter multiple tasks, one per line. Format: Task Title, Hours, Minutes, Date (YYYY-MM-DD). 
-                    Or just task titles (will use form values above or defaults).
+                    Enter multiple tasks, one per line. Format: Task Title 1h1m.
                 </small>
                 @error('bulk_insert')
                     <div class="invalid-feedback">{{ $message }}</div>

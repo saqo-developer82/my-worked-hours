@@ -34,8 +34,8 @@ class WorkedHourController extends Controller
      */
     public function store(StoreWorkedHourRequest $request)
     {
-        $validated = $request->validated();
-        $insertedCount = $this->service->storeWorkedHours($validated);
+        $data = $request->validated();
+        $insertedCount = $this->service->storeWorkedHours($data);
 
         $message = $insertedCount > 1 
             ? "Successfully inserted {$insertedCount} worked hour records."

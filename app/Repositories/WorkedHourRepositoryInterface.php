@@ -30,5 +30,13 @@ interface WorkedHourRepositoryInterface
      * @return WorkedHour
      */
     public function create(array $data): WorkedHour;
+
+    /**
+     * Insert multiple worked hour records.
+     *
+     * @param array $data Array of arrays containing worked hour data
+     * @return bool
+     */
+    public function insert(array $data): bool;
 }
 

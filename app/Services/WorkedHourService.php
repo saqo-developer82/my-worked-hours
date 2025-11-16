@@ -35,25 +35,27 @@ class WorkedHourService
     /**
      * Store worked hours (single or bulk).
      *
-     * @param array $validated
+     * @param array $data
      * @return int Number of records inserted
      */
-    public function storeWorkedHours(array $validated): int
+    public function storeWorkedHours(array $data): int
     {
         $insertedCount = 0;
 
         // Check if bulk insert is provided
-        if (!empty($validated['bulk_insert'])) {
-            $insertedCount = $this->processBulkInsert($validated);
-        } else {
+        if (!empty($data['bulk_insert'])) {
+            $insertedCount = $this->processBulkInsert($data);
+        }
+
+        if (!empty($data['task'])) {
             // Single insert
             $this->repository->create([
-                'task' => $validated['task'],
-                'hours' => $validated['hours'] ?? 0,
-                'minutes' => $validated['minutes'] ?? 0,
-                'date' => $validated['date'] ?? date('Y-m-d'),
+                'task' => $data['task'],
+                'hours' => $data['hours'] ?? 0,
+                'minutes' => $data['minutes'] ?? 0,
+                'date' => $data['date'] ?? date('Y-m-d'),
             ]);
-            $insertedCount = 1;
+            ++$insertedCount;
         }
 
         return $insertedCount;
@@ -62,42 +64,68 @@ class WorkedHourService
     /**
      * Process bulk insert from textarea.
      *
-     * @param array $validated
+     * @param array $data
      * @return int Number of records inserted
      */
-    private function processBulkInsert(array $validated): int
+    private function processBulkInsert(array $data): int
     {
-        $lines = array_filter(array_map('trim', explode("\n", $validated['bulk_insert'])));
+        $lines = array_filter(array_map('trim', explode("\n", $data['bulk_insert'])));
         $insertedCount = 0;
+        $dataToInsert = [];
 
         foreach ($lines as $line) {
-            if (empty($line)) {
+            $line = trim($line);
+            if ($line === '') {
                 continue;
             }
 
-            // Parse the line - could be comma-separated or just task title
-            $parts = array_map('trim', explode(',', $line));
+            // Expect format: "<task text>\t<time>" or "<task text> <time>"
+            // Time examples: "5m", "1h", "1h 50m", "3h:30m"
+            // We'll split task and time by finding the final time pattern at end of line.
 
-            $taskTitle = $parts[0] ?? '';
-            $hours = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : ($validated['hours'] ?? 0);
-            $minutes = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : ($validated['minutes'] ?? 0);
-            $date = isset($parts[3]) && !empty($parts[3]) ? $parts[3] : ($validated['date'] ?? date('Y-m-d'));
-
-            // Validate and format date
-            $date = $this->validateAndFormatDate($date, $validated['date'] ?? null);
-
-            if (!empty($taskTitle)) {
-                $this->repository->create([
-                    'task' => $taskTitle,
-                    'hours' => $hours,
-                    'minutes' => $minutes,
-                    'date' => $date,
-                ]);
-                $insertedCount++;
+            // Normalize internal whitespace for robust matching (tabs/spaces)
+            $normalized = preg_replace('/\s+/', ' ', $line);
+            if ($normalized === null) {
+                $normalized = $line; // Fallback if regex fails
             }
+
+            // Match: capture task text (group 1), hours (group 2, optional), minutes (group 3, optional)
+            // Allows optional colon or space between hours and minutes.
+            $pattern = '/^(.*?)\s+(?:(\d+)\s*h)?(?:\s*:?\s*(\d+)\s*m)?$/i';
+
+            $task = $normalized;
+            $hours = 0;
+            $minutes = 0;
+
+            if (preg_match($pattern, $normalized, $m)) {
+                $task = trim($m[1]);
+                if (isset($m[2]) && $m[2] !== '') {
+                    $hours = (int) $m[2];
+                }
+                if (isset($m[3]) && $m[3] !== '') {
+                    $minutes = (int) $m[3];
+                }
+            } else {
+                // If it doesn't match, attempt minutes-only at end (e.g., "Task 15m")
+                if (preg_match('/^(.*?)\s+(\d+)\s*m$/i', $normalized, $mm)) {
+                    $task = trim($mm[1]);
+                    $minutes = (int) $mm[2];
+                } else {
+                    // Leave as-is with zeroed time to avoid data loss
+                    $task = $normalized;
+                }
+            }
+    
+            $dataToInsert[] = [
+                'task' => $task,
+                'hours' => $hours,
+                'minutes' => $minutes,
+            ];
         }
 
-        return $insertedCount;
+        $this->repository->insert($dataToInsert);
+
+        return count($dataToInsert);
     }
 
     /**

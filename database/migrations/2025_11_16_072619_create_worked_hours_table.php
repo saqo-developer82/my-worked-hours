@@ -18,7 +18,6 @@ return new class extends Migration
                 $table->integer('hours')->default(0);
                 $table->integer('minutes')->default(0);
                 $table->date('date')->default(now());
-                $table->timestamps();
             });
         }
     }
