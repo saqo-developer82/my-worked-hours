@@ -6,9 +6,32 @@
 <div class="card mb-4">
     <div class="card-body">
         <h1 class="card-title mb-4">My Worked Hours</h1>
-        <div class="d-flex gap-2">
-            <a href="{{ route('worked-hours.create') }}" class="btn btn-success">Add New Task(s)</a>
-            <a href="{{ route('worked-hours.export') }}" class="btn btn-info">Export Data</a>
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+            <div class="d-flex gap-2">
+                <a href="{{ route('worked-hours.create') }}" class="btn btn-success">Add New Task(s)</a>
+                <a href="{{ route('worked-hours.export') }}" class="btn btn-info">Export Data</a>
+            </div>
+            @if(isset($totalWorkedHours))
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <span class="text-muted">Total:</span>
+                    <span class="fs-5 fw-bold text-primary">
+                        {{ $totalWorkedHours['formatted'] }}
+                    </span>
+                    @if(request('start_date') && request('end_date'))
+                        <small class="text-muted">
+                            ({{ request('start_date') }} to {{ request('end_date') }})
+                        </small>
+                    @elseif(request('date'))
+                        <small class="text-muted">
+                            ({{ request('date') }})
+                        </small>
+                    @elseif(request('task'))
+                        <small class="text-muted">
+                            (Filtered: "{{ request('task') }}")
+                        </small>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -26,37 +49,6 @@
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if(isset($totalWorkedHours))
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-0">Total Worked Hours</h5>
-                    <p class="mb-0 fs-4 fw-bold text-primary mt-2">
-                        {{ $totalWorkedHours['formatted'] }}
-                        <small class="text-muted fs-6">
-                            ({{ $totalWorkedHours['total_hours'] }}h {{ $totalWorkedHours['total_minutes'] }}m)
-                        </small>
-                    </p>
-                    @if(request('start_date') && request('end_date'))
-                        <p class="text-muted mb-0 mt-2">
-                            <small>Date range: {{ request('start_date') }} to {{ request('end_date') }}</small>
-                        </p>
-                    @elseif(request('date'))
-                        <p class="text-muted mb-0 mt-2">
-                            <small>Date: {{ request('date') }}</small>
-                        </p>
-                    @elseif(request('task'))
-                        <p class="text-muted mb-0 mt-2">
-                            <small>Filtered by task: "{{ request('task') }}"</small>
-                        </p>
-                    @else
-                        <p class="text-muted mb-0 mt-2">
-                            <small>All records</small>
-                        </p>
-                    @endif
-                </div>
             </div>
         @endif
 
