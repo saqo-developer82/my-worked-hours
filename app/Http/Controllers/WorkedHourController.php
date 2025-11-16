@@ -21,6 +21,8 @@ class WorkedHourController extends Controller
         $filters = [
             'task' => request()->get('task'),
             'date' => request()->get('date'),
+            'start_date' => request()->get('start_date'),
+            'end_date' => request()->get('end_date'),
         ];
 
         $workedHours = $this->service->getPaginatedWorkedHours(10, $filters);

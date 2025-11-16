@@ -24,8 +24,11 @@ class WorkedHourRepository implements WorkedHourRepositoryInterface
             $query->whereRaw('LOWER(task) LIKE ?', ['%' . strtolower($filters['task']) . '%']);
         }
 
-        // Filter by date
-        if (!empty($filters['date'])) {
+        // Filter by date interval (takes precedence over single date)
+        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+            $query->whereBetween('date', [$filters['start_date'], $filters['end_date']]);
+        } elseif (!empty($filters['date'])) {
+            // Filter by single date
             $query->whereDate('date', $filters['date']);
         }
 
