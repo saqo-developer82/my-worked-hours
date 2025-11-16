@@ -18,7 +18,12 @@ class WorkedHourController extends Controller
      */
     public function index()
     {
-        $workedHours = $this->service->getPaginatedWorkedHours(10);
+        $filters = [
+            'task' => request()->get('task'),
+            'date' => request()->get('date'),
+        ];
+
+        $workedHours = $this->service->getPaginatedWorkedHours(10, $filters);
 
         return view('worked-hours.index', compact('workedHours'));
     }

@@ -19,11 +19,12 @@ class WorkedHourService
      * Get paginated worked hours.
      *
      * @param int $perPage
+     * @param array $filters
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getPaginatedWorkedHours(int $perPage = 10)
+    public function getPaginatedWorkedHours(int $perPage = 10, array $filters = [])
     {
-        return $this->repository->getAllPaginated($perPage);
+        return $this->repository->getAllPaginated($perPage, $filters);
     }
 
     /**

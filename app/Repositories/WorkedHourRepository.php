@@ -12,12 +12,26 @@ class WorkedHourRepository implements WorkedHourRepositoryInterface
      * Get all worked hours ordered by date descending with pagination.
      *
      * @param int $perPage
+     * @param array $filters
      * @return LengthAwarePaginator
      */
-    public function getAllPaginated(int $perPage = 10): LengthAwarePaginator
+    public function getAllPaginated(int $perPage = 10, array $filters = []): LengthAwarePaginator
     {
-        return WorkedHour::orderBy('date', 'desc')
-            ->paginate($perPage);
+        $query = WorkedHour::query();
+
+        // Filter by task (case-insensitive LIKE)
+        if (!empty($filters['task'])) {
+            $query->whereRaw('LOWER(task) LIKE ?', ['%' . strtolower($filters['task']) . '%']);
+        }
+
+        // Filter by date
+        if (!empty($filters['date'])) {
+            $query->whereDate('date', $filters['date']);
+        }
+
+        return $query->orderBy('date', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     /**

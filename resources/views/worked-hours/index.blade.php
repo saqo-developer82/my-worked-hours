@@ -29,6 +29,28 @@
             </div>
         @endif
 
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Filters</h5>
+                <form method="GET" action="{{ route('worked-hours.index') }}" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="task" class="form-label">Task</label>
+                        <input type="text" name="task" id="task" class="form-control" value="{{ request('task') }}" placeholder="Search by task name...">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" name="date" id="date" class="form-control" value="{{ request('date') }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <a href="{{ route('worked-hours.index') }}" class="btn btn-secondary">Clear</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         @if($workedHours->count() > 0)
             <div class="table-responsive">
                 <table class="table table-striped table-hover">

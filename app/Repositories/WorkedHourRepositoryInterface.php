@@ -12,9 +12,10 @@ interface WorkedHourRepositoryInterface
      * Get all worked hours ordered by date descending with pagination.
      *
      * @param int $perPage
+     * @param array $filters
      * @return LengthAwarePaginator
      */
-    public function getAllPaginated(int $perPage = 10): LengthAwarePaginator;
+    public function getAllPaginated(int $perPage = 10, array $filters = []): LengthAwarePaginator;
 
     /**
      * Get all worked hours ordered by date descending.
