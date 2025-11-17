@@ -264,7 +264,7 @@ class WorkedHourService
         $sheet->getColumnDimension('B')->setAutoSize(true);
 
         // Generate filename
-        $filename = 'worked_hours_' . $startDate . '_to_' . $endDate . '.xlsx';
+        $filename = 'Report_' . $startDate . '_to_' . $endDate . '.xlsx';
         $filePath = storage_path('app/' . $filename);
 
         // Write file
