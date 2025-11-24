@@ -25,7 +25,7 @@ class WorkedHourController extends Controller
             'end_date' => request()->get('end_date'),
         ];
 
-        $workedHours = $this->service->getPaginatedWorkedHours(10, $filters);
+        $workedHours = $this->service->getPaginatedWorkedHours(50, $filters);
 
         // Calculate totals based on current filters
         $totalWorkedHours = $this->service->getTotalWorkedHoursWithFilters($filters);
