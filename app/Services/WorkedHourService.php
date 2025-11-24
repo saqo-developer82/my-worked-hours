@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\WorkedHourRepositoryInterface;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -218,26 +219,12 @@ class WorkedHourService
         $totalHours += intval($totalMinutes / 60);
         $totalMinutes = $totalMinutes % 60;
 
-        // Create spreadsheet
-        $spreadsheet = new Spreadsheet();
+        // Load template file
+        $templatePath = public_path('Report_template.xlsx');
+        $spreadsheet = IOFactory::load($templatePath);
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Set headers
-        $sheet->setCellValue('A1', 'TASKS/WORK');
-        $sheet->setCellValue('B1', 'Duration');
-
-        // Style headers
-        $headerStyle = [
-            'font' => ['bold' => true],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'E0E0E0'],
-            ],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-        ];
-        $sheet->getStyle('A1:B1')->applyFromArray($headerStyle);
-
-        // Add data rows
+        // Add data rows starting from row 2
         $row = 2;
         foreach ($groupedData as $item) {
             $sheet->setCellValue('A' . $row, $item['task']);
@@ -258,10 +245,6 @@ class WorkedHourService
             ],
         ];
         $sheet->getStyle('A' . $row . ':B' . $row)->applyFromArray($totalStyle);
-
-        // Auto-size columns
-        $sheet->getColumnDimension('A')->setAutoSize(true);
-        $sheet->getColumnDimension('B')->setAutoSize(true);
 
         // Generate filename
         $filename = 'Report_' . $startDate . '_to_' . $endDate . '.xlsx';
