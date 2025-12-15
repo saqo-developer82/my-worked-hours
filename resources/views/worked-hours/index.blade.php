@@ -2,6 +2,10 @@
 
 @section('title', 'Worked Hours')
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+@endpush
+
 @section('content')
 <div class="card mb-4">
     <div class="card-body">
@@ -129,3 +133,27 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create custom locale with Monday as first day
+        flatpickr.localize({
+            firstDayOfWeek: 1 // Monday
+        });
+
+        // Initialize Flatpickr for all date inputs with Monday as first day
+        const dateConfig = {
+            dateFormat: "Y-m-d",
+            locale: {
+                firstDayOfWeek: 1 // Monday
+            }
+        };
+
+        flatpickr("#date", dateConfig);
+        flatpickr("#start_date", dateConfig);
+        flatpickr("#end_date", dateConfig);
+    });
+</script>
+@endpush
