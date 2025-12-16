@@ -88,41 +88,57 @@
         </div>        
 
         @if($workedHours->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Task/Work</th>
-                            <th>Hours</th>
-                            <th>Minutes</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($workedHours as $workedHour)
-                            <tr>
-                                <td>{{ $workedHour->id }}</td>
-                                <td>{{ $workedHour->task }}</td>
-                                <td>{{ $workedHour->hours }}</td>
-                                <td>{{ $workedHour->minutes }}</td>
-                                <td>{{ $workedHour->date->format('Y-m-d') }}</td>
-                                <td>
-                                    <div class="d-flex gap-2">
-                                        <a href="{{ route('worked-hours.edit', $workedHour->id) }}" class="btn btn-primary btn-sm">Edit</a>
-                                        <form action="{{ route('worked-hours.destroy', $workedHour->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this record?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+            @php
+                $groupedByDate = $workedHours->groupBy(function($item) {
+                    return $item->date->format('Y-m-d');
+                });
+            @endphp
+            
+            @foreach($groupedByDate as $date => $dateGroup)
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            {{ \Carbon\Carbon::parse($date)->format('l, F j, Y') }}
+                            <span class="badge bg-light text-dark ms-2">{{ $dateGroup->count() }} {{ $dateGroup->count() === 1 ? 'task' : 'tasks' }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Task/Work</th>
+                                        <th>Hours</th>
+                                        <th>Minutes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($dateGroup as $workedHour)
+                                        <tr>
+                                            <td>{{ $workedHour->id }}</td>
+                                            <td>{{ $workedHour->task }}</td>
+                                            <td>{{ $workedHour->hours }}</td>
+                                            <td>{{ $workedHour->minutes }}</td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ route('worked-hours.edit', $workedHour->id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                                    <form action="{{ route('worked-hours.destroy', $workedHour->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
 
             <div class="mt-3">
                 {{ $workedHours->links('pagination::bootstrap-5') }}
