@@ -89,18 +89,52 @@
 
         @if($workedHours->count() > 0)
             @php
+                $formatDuration = function (int $hours, int $minutes): string {
+                    $hours += intdiv($minutes, 60);
+                    $minutes = $minutes % 60;
+
+                    if ($hours === 0 && $minutes === 0) {
+                        return '0m';
+                    }
+
+                    if ($hours === 0) {
+                        return $minutes . 'm';
+                    }
+
+                    if ($minutes === 0) {
+                        return $hours . 'h';
+                    }
+
+                    return $hours . 'h:' . $minutes . 'm';
+                };
+
                 $groupedByDate = $workedHours->groupBy(function($item) {
                     return $item->date->format('Y-m-d');
                 });
             @endphp
             
             @foreach($groupedByDate as $date => $dateGroup)
+                @php
+                    $dateTotals = $dateGroup->reduce(function ($carry, $item) {
+                        $carry['hours'] += (int) $item->hours;
+                        $carry['minutes'] += (int) $item->minutes;
+                        return $carry;
+                    }, ['hours' => 0, 'minutes' => 0]);
+
+                    $dateTotals['hours'] += intdiv($dateTotals['minutes'], 60);
+                    $dateTotals['minutes'] = $dateTotals['minutes'] % 60;
+                @endphp
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            {{ \Carbon\Carbon::parse($date)->format('l, F j, Y') }}
-                            <span class="badge bg-light text-dark ms-2">{{ $dateGroup->count() }} {{ $dateGroup->count() === 1 ? 'task' : 'tasks' }}</span>
-                        </h5>
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <h5 class="mb-0">
+                                {{ \Carbon\Carbon::parse($date)->format('l, F j, Y') }}
+                                <span class="badge bg-light text-dark ms-2">{{ $dateGroup->count() }} {{ $dateGroup->count() === 1 ? 'task' : 'tasks' }}</span>
+                            </h5>
+                            <span class="badge bg-dark">
+                                Total: {{ $formatDuration($dateTotals['hours'], $dateTotals['minutes']) }}
+                            </span>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -109,8 +143,7 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Task/Work</th>
-                                        <th>Hours</th>
-                                        <th>Minutes</th>
+                                        <th>Time</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -119,8 +152,7 @@
                                         <tr>
                                             <td>{{ $workedHour->id }}</td>
                                             <td>{{ $workedHour->task }}</td>
-                                            <td>{{ $workedHour->hours }}</td>
-                                            <td>{{ $workedHour->minutes }}</td>
+                                            <td>{{ $formatDuration((int) $workedHour->hours, (int) $workedHour->minutes) }}</td>
                                             <td>
                                                 <div class="d-flex gap-2">
                                                     <a href="{{ route('worked-hours.edit', $workedHour->id) }}" class="btn btn-primary btn-sm">Edit</a>
