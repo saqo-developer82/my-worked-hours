@@ -39,6 +39,7 @@ A Laravel 11 web application for tracking and managing worked hours on various t
 - PHP >= 8.2
 - MySQL Database
 - Composer
+- Node.js >= 18.x and npm
 - Laravel 11
 
 ## Installation
@@ -48,18 +49,23 @@ A Laravel 11 web application for tracking and managing worked hours on various t
    cd /var/www/MyWorkedHours
    ```
 
-2. **Install dependencies**:
+2. **Install PHP dependencies**:
    ```bash
    composer install
    ```
 
-3. **Configure environment**:
+3. **Install Node.js dependencies**:
+   ```bash
+   npm install
+   ```
+
+4. **Configure environment**:
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
-4. **Configure database**:
+5. **Configure database**:
    Edit `.env` file and set your database credentials:
    ```env
    DB_CONNECTION=mysql
@@ -70,7 +76,7 @@ A Laravel 11 web application for tracking and managing worked hours on various t
    DB_PASSWORD=your_password
    ```
 
-5. **Run migrations**:
+6. **Run migrations**:
    ```bash
    php artisan migrate
    ```
@@ -84,7 +90,17 @@ A Laravel 11 web application for tracking and managing worked hours on various t
    - `created_at` (timestamp)
    - `updated_at` (timestamp)
 
-6. **Start the development server**:
+7. **Build frontend assets**:
+   ```bash
+   npm run build
+   ```
+   
+   For development with hot reload:
+   ```bash
+   npm run dev
+   ```
+
+8. **Start the development server**:
    ```bash
    php artisan serve
    ```
@@ -168,16 +184,34 @@ MyWorkedHours/
 │   └── migrations/
 │       └── 2025_11_16_072619_create_worked_hours_table.php
 ├── resources/
+│   ├── css/
+│   │   ├── app.css
+│   │   └── worked-hours.css
+│   ├── js/
+│   │   ├── app.js
+│   │   ├── bootstrap.js
+│   │   └── worked-hours.js
 │   └── views/
 │       ├── layouts/
 │       │   └── app.blade.php
 │       └── worked-hours/
+│           ├── partials/
+│           │   ├── _header.blade.php
+│           │   ├── _alerts.blade.php
+│           │   ├── _filters.blade.php
+│           │   ├── _date-group.blade.php
+│           │   ├── _task-row.blade.php
+│           │   └── _empty-state.blade.php
 │           ├── index.blade.php
 │           ├── create.blade.php
 │           ├── edit.blade.php
 │           └── export.blade.php
-└── routes/
-    └── web.php
+├── public/
+│   └── build/
+│       └── (compiled assets)
+├── routes/
+│   └── web.php
+└── vite.config.js
 ```
 
 ## Architecture
@@ -190,11 +224,31 @@ The application follows a clean architecture pattern:
 - **Requests**: Validate form input
 - **Models**: Represent database entities
 
+### Frontend Architecture
+
+The frontend is organized using a modular approach:
+
+- **Blade Partials**: Views are broken down into reusable partial components:
+  - `_header.blade.php`: Page header with title, buttons, and totals
+  - `_alerts.blade.php`: Success and error alert messages
+  - `_filters.blade.php`: Filter form component
+  - `_date-group.blade.php`: Date group card with collapsible task list
+  - `_task-row.blade.php`: Individual task row component
+  - `_empty-state.blade.php`: Empty state message
+
+- **Asset Management**: Frontend assets are managed with Vite:
+  - `resources/css/worked-hours.css`: Custom styles for worked hours pages
+  - `resources/js/worked-hours.js`: JavaScript for date pickers and UI interactions
+  - Assets are compiled and optimized using Vite build system
+
 ## Technologies Used
 
 - **Laravel 11**: PHP web framework
 - **MySQL**: Database
 - **Bootstrap 5**: Frontend CSS framework
+- **Bootstrap Icons**: Icon library
+- **Vite**: Frontend build tool and asset bundler
+- **Flatpickr**: Date picker library
 - **PhpSpreadsheet**: Excel file generation
 - **Blade**: Laravel templating engine
 
