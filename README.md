@@ -262,7 +262,3 @@ The frontend is organized using a modular approach:
 - `DELETE /worked-hours/{id}` - Delete task
 - `GET /worked-hours/export` - Show export form
 - `POST /worked-hours/export` - Process export and download Excel file
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
