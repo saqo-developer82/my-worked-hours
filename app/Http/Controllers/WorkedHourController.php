@@ -121,8 +121,9 @@ class WorkedHourController extends Controller
         $validated = $request->validated();
         $startDate = $validated['start_date'];
         $endDate = $validated['end_date'];
+        $includeHours = isset($validated['include_hours']) && $validated['include_hours'];
 
-        $exportData = $this->service->generateExportFile($startDate, $endDate);
+        $exportData = $this->service->generateExportFile($startDate, $endDate, $includeHours);
 
         return response()->download($exportData['filePath'], $exportData['filename'])->deleteFileAfterSend(true);
     }

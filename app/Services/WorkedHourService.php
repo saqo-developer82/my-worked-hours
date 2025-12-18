@@ -200,24 +200,27 @@ class WorkedHourService
      *
      * @param string $startDate
      * @param string $endDate
+     * @param bool $includeHours Whether to include hours/duration in the export
      * @return array ['filePath' => string, 'filename' => string]
      */
-    public function generateExportFile(string $startDate, string $endDate): array
+    public function generateExportFile(string $startDate, string $endDate, bool $includeHours = true): array
     {
         // Get grouped data
         $groupedData = $this->getGroupedWorkedHoursForExport($startDate, $endDate);
 
-        // Calculate totals
+        // Calculate totals (only if including hours)
         $totalHours = 0;
         $totalMinutes = 0;
-        foreach ($groupedData as $item) {
-            $totalHours += $item['total_hours'];
-            $totalMinutes += $item['total_minutes'];
-        }
+        if ($includeHours) {
+            foreach ($groupedData as $item) {
+                $totalHours += $item['total_hours'];
+                $totalMinutes += $item['total_minutes'];
+            }
 
-        // Convert excess minutes to hours
-        $totalHours += intval($totalMinutes / 60);
-        $totalMinutes = $totalMinutes % 60;
+            // Convert excess minutes to hours
+            $totalHours += intval($totalMinutes / 60);
+            $totalMinutes = $totalMinutes % 60;
+        }
 
         // Load template file
         $templatePath = public_path('Report_template.xlsx');
@@ -228,23 +231,27 @@ class WorkedHourService
         $row = 2;
         foreach ($groupedData as $item) {
             $sheet->setCellValue('A' . $row, $item['task']);
-            $sheet->setCellValue('B' . $row, $this->formatDuration($item['total_hours'], $item['total_minutes']));
+            if ($includeHours) {
+                $sheet->setCellValue('B' . $row, $this->formatDuration($item['total_hours'], $item['total_minutes']));
+            }
             $row++;
         }
 
-        // Add total row
-        $sheet->setCellValue('A' . $row, 'TOTAL');
-        $sheet->setCellValue('B' . $row, $this->formatDuration($totalHours, $totalMinutes));
+        // Add total row (only if including hours)
+        if ($includeHours) {
+            $sheet->setCellValue('A' . $row, 'TOTAL');
+            $sheet->setCellValue('B' . $row, $this->formatDuration($totalHours, $totalMinutes));
 
-        // Style total row
-        $totalStyle = [
-            'font' => ['bold' => true],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'D0D0D0'],
-            ],
-        ];
-        $sheet->getStyle('A' . $row . ':B' . $row)->applyFromArray($totalStyle);
+            // Style total row
+            $totalStyle = [
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'D0D0D0'],
+                ],
+            ];
+            $sheet->getStyle('A' . $row . ':B' . $row)->applyFromArray($totalStyle);
+        }
 
         // Generate filename
         $filename = 'Report_' . $startDate . '_to_' . $endDate . '.xlsx';

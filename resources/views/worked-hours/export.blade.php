@@ -33,6 +33,13 @@
                 @enderror
             </div>
 
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" name="include_hours" id="include_hours" class="form-check-input" value="1" {{ old('include_hours', true) ? 'checked' : '' }}>
+                    <label for="include_hours" class="form-check-label">Include hours in export</label>
+                </div>
+            </div>
+
             <script>
                 document.getElementById('start_date').addEventListener('change', function() {
                     const startDate = new Date(this.value);
