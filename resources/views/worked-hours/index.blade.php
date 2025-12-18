@@ -125,9 +125,10 @@
                     $dateTotals['minutes'] = $dateTotals['minutes'] % 60;
                 @endphp
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-primary text-white" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $loop->index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse-{{ $loop->index }}">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                            <h5 class="mb-0">
+                            <h5 class="mb-0 d-flex align-items-center gap-2">
+                                <i class="bi {{ $loop->first ? 'bi-chevron-down' : 'bi-chevron-up' }} collapse-icon" id="icon-{{ $loop->index }}"></i>
                                 {{ \Carbon\Carbon::parse($date)->format('l, F j, Y') }}
                                 <span class="badge bg-light text-dark ms-2">{{ $dateGroup->count() }} {{ $dateGroup->count() === 1 ? 'task' : 'tasks' }}</span>
                             </h5>
@@ -136,37 +137,39 @@
                             </span>
                         </div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Task/Work</th>
-                                        <th>Time</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($dateGroup as $workedHour)
+                    <div id="collapse-{{ $loop->index }}" class="collapse {{ $loop->first ? 'show' : '' }}">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $workedHour->id }}</td>
-                                            <td>{{ $workedHour->task }}</td>
-                                            <td>{{ $formatDuration((int) $workedHour->hours, (int) $workedHour->minutes) }}</td>
-                                            <td>
-                                                <div class="d-flex gap-2">
-                                                    <a href="{{ route('worked-hours.edit', $workedHour->id) }}" class="btn btn-primary btn-sm">Edit</a>
-                                                    <form action="{{ route('worked-hours.destroy', $workedHour->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this record?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                                    </form>
-                                                </div>
-                                            </td>
+                                            <th>ID</th>
+                                            <th>Task/Work</th>
+                                            <th>Time</th>
+                                            <th>Actions</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($dateGroup as $workedHour)
+                                            <tr>
+                                                <td>{{ $workedHour->id }}</td>
+                                                <td>{{ $workedHour->task }}</td>
+                                                <td>{{ $formatDuration((int) $workedHour->hours, (int) $workedHour->minutes) }}</td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <a href="{{ route('worked-hours.edit', $workedHour->id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                                        <form action="{{ route('worked-hours.destroy', $workedHour->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,6 +205,40 @@
         flatpickr("#date", dateConfig);
         flatpickr("#start_date", dateConfig);
         flatpickr("#end_date", dateConfig);
+
+        // Handle collapse/expand icon rotation
+        const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+        collapseElements.forEach(function(element) {
+            const targetId = element.getAttribute('data-bs-target');
+            const iconId = element.querySelector('.collapse-icon')?.id;
+            
+            if (iconId && targetId) {
+                const targetElement = document.querySelector(targetId);
+                const icon = document.getElementById(iconId);
+                
+                if (targetElement && icon) {
+                    // Set initial state
+                    if (targetElement.classList.contains('show')) {
+                        icon.classList.remove('bi-chevron-up');
+                        icon.classList.add('bi-chevron-down');
+                    } else {
+                        icon.classList.remove('bi-chevron-down');
+                        icon.classList.add('bi-chevron-up');
+                    }
+                    
+                    // Listen for collapse events
+                    targetElement.addEventListener('show.bs.collapse', function() {
+                        icon.classList.remove('bi-chevron-up');
+                        icon.classList.add('bi-chevron-down');
+                    });
+                    
+                    targetElement.addEventListener('hide.bs.collapse', function() {
+                        icon.classList.remove('bi-chevron-down');
+                        icon.classList.add('bi-chevron-up');
+                    });
+                }
+            }
+        });
     });
 </script>
 @endpush
