@@ -4,10 +4,8 @@ namespace App\Services;
 
 use App\Repositories\WorkedHourRepositoryInterface;
 use Carbon\Carbon;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class WorkedHourService
@@ -59,7 +57,7 @@ class WorkedHourService
                 'task' => $data['task'],
                 'hours' => $data['hours'] ?? 0,
                 'minutes' => $data['minutes'] ?? 0,
-                'date' => $data['date'] ?? date('Y-m-d'),
+                'date' => !empty($data['date']) ? $data['date'] : date('Y-m-d'),
             ]);
             ++$insertedCount;
         }
@@ -125,6 +123,7 @@ class WorkedHourService
                 'task' => $task,
                 'hours' => $hours,
                 'minutes' => $minutes,
+                'date' => !empty($data['date']) ? $data['date'] : date('Y-m-d'),
             ];
         }
 
